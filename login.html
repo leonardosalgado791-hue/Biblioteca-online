@@ -144,6 +144,43 @@
       color: #7d5a60;
       margin-top: 10px;
     }
+
+    /* === Diseño para teléfonos (responsive) === */
+@media (max-width: 700px) {
+  .card {
+    grid-template-columns: 1fr; /* Pasa a una sola columna */
+    width: 100%;
+  }
+
+  .hero {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 22px;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .form-wrap {
+    padding: 22px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .btn {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
   </style>
 </head>
 
@@ -248,3 +285,4 @@
 
 </body>
 </html>
+
