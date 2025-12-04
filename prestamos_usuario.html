@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Préstamos</title>
+
+    <style>
+        body {
+            background-color: #3A001E;
+            font-family: Arial;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #5A002F;
+            margin: 0;
+        }
+
+        table {
+            width: 95%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #ffffffdd;
+            color: black;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #5A002F;
+            padding: 12px;
+            color: white;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .btn-volver {
+            display: block;
+            width: 200px;
+            margin: 40px auto;
+            text-align: center;
+            padding: 15px;
+            background: #5A002F;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>📘 Mis Préstamos</h1>
+
+<table id="tablaPrestamos">
+    <tr>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Fecha de préstamo</th>
+        <th>Fecha límite</th>
+        <th>Tiempo (semanas)</th>
+    </tr>
+</table>
+
+<a class="btn-volver" href="Menu.html">⬅ Regresar</a>
+
+<script>
+
+/* =====================================
+   🔹 MOSTRAR PRÉSTAMOS DEL USUARIO
+   ===================================== */
+function cargarPrestamos() {
+    const tabla = document.getElementById("tablaPrestamos");
+
+    const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
+    if (!usuarioActivo) {
+        alert("No hay usuario autenticado.");
+        return;
+    }
+
+    let usuariosDB = JSON.parse(localStorage.getItem("usuarios")) || [];
+    let datosUsuario = usuariosDB.find(u => u.usuario === usuarioActivo.usuario);
+
+    if (!datosUsuario || !datosUsuario.prestamos) {
+        tabla.innerHTML += `
+            <tr><td colspan="5">Sin préstamos registrados</td></tr>
+        `;
+        return;
+    }
+
+    if (datosUsuario.prestamos.length === 0) {
+        tabla.innerHTML += `
+            <tr><td colspan="5">Sin préstamos registrados</td></tr>
+        `;
+        return;
+    }
+
+    datosUsuario.prestamos.forEach(p => {
+        
+        // Calcular semanas de préstamo
+        const f1 = new Date(p.fechaPrestamo);
+        const f2 = new Date(p.fechaLimite);
+        const diferenciaDias = (f2 - f1) / (1000 * 60 * 60 * 24);
+        const semanas = Math.floor(diferenciaDias / 7);
+
+        tabla.innerHTML += `
+            <tr>
+                <td>${p.titulo}</td>
+                <td>${p.autor}</td>
+                <td>${p.fechaPrestamo}</td>
+                <td>${p.fechaLimite}</td>
+                <td>${semanas} semanas</td>
+            </tr>
+        `;
+    });
+}
+
+cargarPrestamos();
+
+</script>
+
+</body>
+</html>

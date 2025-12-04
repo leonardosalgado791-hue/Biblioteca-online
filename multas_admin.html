@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Multas - Biblioteca</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f3f3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            background-color: #8B0000;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #8B0000;
+            color: white;
+        }
+
+        .btn-volver {
+            display: block;
+            margin: 25px auto;
+            padding: 12px 25px;
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-volver:hover {
+            background-color: #600000;
+        }
+
+        .btn-pagar {
+            background-color: green;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-pagar:hover {
+            background-color: darkgreen;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Multas por Retrasos</h1>
+
+    <table id="tablaMultas">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Libro</th>
+                <th>Días de retraso</th>
+                <th>Monto total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button class="btn-volver" onclick="window.location.href='Administrador.html'">Volver</button>
+
+    <script>
+        function cargarMultas() {
+            const tabla = document.querySelector("#tablaMultas tbody");
+            tabla.innerHTML = "";
+
+            let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
+
+            const hoy = new Date();
+
+            prestamos.forEach((p, index) => {
+                // Si la multa ya fue pagada, no se muestra
+                if (p.multa_pagada === true) {
+                    return;
+                }
+
+                let fechaLimite = new Date(p.fecha_limite);
+                let fechaDevolucion = p.fecha_devolucion ? new Date(p.fecha_devolucion) : null;
+
+                let diasRetraso = 0;
+
+                if (!fechaDevolucion) {
+                    if (hoy > fechaLimite) {
+                        let diferencia = hoy - fechaLimite;
+                        diasRetraso = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+                    }
+                } else {
+                    if (fechaDevolucion > fechaLimite) {
+                        let diferencia = fechaDevolucion - fechaLimite;
+                        diasRetraso = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+                    }
+                }
+
+                if (diasRetraso > 0) {
+                    let monto = diasRetraso * 50;
+
+                    let fila = `
+                        <tr>
+                            <td>${p.usuario}</td>
+                            <td>${p.libro}</td>
+                            <td>${diasRetraso}</td>
+                            <td>$${monto} MXN</td>
+                            <td>
+                                <button class="btn-pagar" onclick="pagarMulta(${index})">Pagar</button>
+                            </td>
+                        </tr>
+                    `;
+
+                    tabla.innerHTML += fila;
+                }
+            });
+        }
+
+        function pagarMulta(index) {
+            let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
+            
+            prestamos[index].multa_pagada = true;
+
+            localStorage.setItem("prestamos", JSON.stringify(prestamos));
+
+            alert("Multa marcada como pagada correctamente.");
+
+            cargarMultas();
+        }
+
+        cargarMultas();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Libros</title>
+
+    <style>
+        /* --- TU DISEÑO ORIGINAL (sin cambios en apariencia) --- */
+        body {
+            background-color: #3A001E;
+            font-family: Arial;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #5A002F;
+            margin: 0;
+        }
+
+        .buscador {
+            width: 90%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        input {
+            width: 60%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        table {
+            width: 95%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #ffffffdd;
+            color: black;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #5A002F;
+            padding: 12px;
+            color: white;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .btn-prestar {
+            background-color: #5A002F;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-prestar:hover {
+            background-color: #7A0040;
+        }
+
+        .btn-volver {
+            display: block;
+            width: 200px;
+            margin: 40px auto;
+            text-align: center;
+            padding: 15px;
+            background: #5A002F;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>📚 Lista de Libros</h1>
+
+<div class="buscador">
+    <input type="text" id="buscar" placeholder="Buscar por título, autor, categoría, editorial o año...">
+</div>
+
+<table id="tablaLibros">
+    <tr>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Año</th>
+        <th>Categoría</th>
+        <th>Editorial</th>
+        <th>Existencias</th>
+        <th>Acción</th>
+    </tr>
+</table>
+
+<a class="btn-volver" href="Menu.html">⬅ Regresar</a>
+
+<script>
+/* ================================
+   LIBROS (estructura: nombre, autor, año, categoria, editorial, existencias)
+   He combinado los arrays que me diste para obtener 100 libros reales.
+   Si quieres modificar/añadir libros, edita el array `todosLosLibros`.
+   ================================ */
+
+const librosIniciales = [
+    {nombre:"Cien años de soledad", autor:"Gabriel García Márquez", año:1967, categoria:"Novela", editorial:"Sudamericana", existencias:12},
+    {nombre:"El principito", autor:"Antoine de Saint-Exupéry", año:1943, categoria:"Infantil", editorial:"Reynal & Hitchcock", existencias:15},
+    {nombre:"1984", autor:"George Orwell", año:1949, categoria:"Distopía", editorial:"Secker & Warburg", existencias:9},
+    {nombre:"Don Quijote de la Mancha", autor:"Miguel de Cervantes", año:1605, categoria:"Clásico", editorial:"Francisco de Robles", existencias:8},
+    {nombre:"Harry Potter y la piedra filosofal", autor:"J.K. Rowling", año:1997, categoria:"Fantasía", editorial:"Bloomsbury", existencias:13},
+    {nombre:"Orgullo y prejuicio", autor:"Jane Austen", año:1813, categoria:"Romance", editorial:"T. Egerton", existencias:10},
+    {nombre:"El señor de los anillos", autor:"J.R.R. Tolkien", año:1954, categoria:"Fantasía", editorial:"Allen & Unwin", existencias:11},
+    {nombre:"Crónica de una muerte anunciada", autor:"Gabriel García Márquez", año:1981, categoria:"Novela", editorial:"La Oveja Negra", existencias:6},
+    {nombre:"Fahrenheit 451", autor:"Ray Bradbury", año:1953, categoria:"Distopía", editorial:"Ballantine Books", existencias:7},
+    {nombre:"El Hobbit", autor:"J.R.R. Tolkien", año:1937, categoria:"Fantasía", editorial:"Allen & Unwin", existencias:14}
+];
+
+// Lista extra (continúa hasta completar ~100). He añadido muchos de los que pusiste.
+const librosExtra = [
+    {nombre:"Matar a un ruiseñor", autor:"Harper Lee", año:1960, categoria:"Drama", editorial:"J.B. Lippincott", existencias:8},
+    {nombre:"El código Da Vinci", autor:"Dan Brown", año:2003, categoria:"Suspenso", editorial:"Doubleday", existencias:9},
+    {nombre:"It", autor:"Stephen King", año:1986, categoria:"Terror", editorial:"Viking Press", existencias:7},
+    {nombre:"Carrie", autor:"Stephen King", año:1974, categoria:"Terror", editorial:"Doubleday", existencias:6},
+    {nombre:"El resplandor", autor:"Stephen King", año:1977, categoria:"Terror", editorial:"Doubleday", existencias:10},
+    {nombre:"Drácula", autor:"Bram Stoker", año:1897, categoria:"Terror", editorial:"Archibald Constable", existencias:5},
+    {nombre:"Frankenstein", autor:"Mary Shelley", año:1818, categoria:"Terror", editorial:"Lackington, Hughes", existencias:9},
+    {nombre:"El alquimista", autor:"Paulo Coelho", año:1988, categoria:"Ficción", editorial:"HarperTorch", existencias:12},
+    {nombre:"Rayuela", autor:"Julio Cortázar", año:1963, categoria:"Novela", editorial:"Sudamericana", existencias:8},
+    {nombre:"La sombra del viento", autor:"Carlos Ruiz Zafón", año:2001, categoria:"Misterio", editorial:"Planeta", existencias:9},
+    {nombre:"El psicoanalista", autor:"John Katzenbach", año:2002, categoria:"Thriller", editorial:"Ballantine Books", existencias:7},
+    {nombre:"La chica del tren", autor:"Paula Hawkins", año:2015, categoria:"Suspenso", editorial:"Riverhead Books", existencias:9},
+    {nombre:"Los juegos del hambre", autor:"Suzanne Collins", año:2008, categoria:"Distopía", editorial:"Scholastic Press", existencias:12},
+    {nombre:"En llamas", autor:"Suzanne Collins", año:2009, categoria:"Distopía", editorial:"Scholastic Press", existencias:10},
+    {nombre:"Sinsajo", autor:"Suzanne Collins", año:2010, categoria:"Distopía", editorial:"Scholastic Press", existencias:11},
+    {nombre:"El perfume", autor:"Patrick Süskind", año:1985, categoria:"Novela", editorial:"Diogenes Verlag", existencias:7},
+    {nombre:"La ladrona de libros", autor:"Markus Zusak", año:2005, categoria:"Histórica", editorial:"Picador", existencias:8},
+    {nombre:"El nombre del viento", autor:"Patrick Rothfuss", año:2007, categoria:"Fantasía", editorial:"DAW Books", existencias:9},
+    {nombre:"El temor de un hombre sabio", autor:"Patrick Rothfuss", año:2011, categoria:"Fantasía", editorial:"DAW Books", existencias:7},
+    {nombre:"Divergente", autor:"Veronica Roth", año:2011, categoria:"Distopía", editorial:"Katherine Tegen Books", existencias:10},
+    {nombre:"Insurgente", autor:"Veronica Roth", año:2012, categoria:"Distopía", editorial:"Katherine Tegen Books", existencias:8},
+    {nombre:"Leal", autor:"Veronica Roth", año:2013, categoria:"Distopía", editorial:"Katherine Tegen Books", existencias:7},
+    {nombre:"El silencio de los inocentes", autor:"Thomas Harris", año:1988, categoria:"Thriller", editorial:"St. Martin's Press", existencias:6},
+    {nombre:"El viejo y el mar", autor:"Ernest Hemingway", año:1952, categoria:"Novela", editorial:"Charles Scribner’s Sons", existencias:9},
+    {nombre:"El extranjero", autor:"Albert Camus", año:1942, categoria:"Filosofía", editorial:"Gallimard", existencias:8},
+    {nombre:"La insoportable levedad del ser", autor:"Milan Kundera", año:1984, categoria:"Filosofía", editorial:"Gallimard", existencias:7},
+    {nombre:"El retrato de Dorian Gray", autor:"Oscar Wilde", año:1890, categoria:"Clásico", editorial:"Lippincott’s Monthly Magazine", existencias:10},
+    {nombre:"El gran Gatsby", autor:"F. Scott Fitzgerald", año:1925, categoria:"Novela", editorial:"Scribner", existencias:9},
+    {nombre:"Moby Dick", autor:"Herman Melville", año:1851, categoria:"Aventura", editorial:"Harper & Brothers", existencias:6},
+    {nombre:"La metamorfosis", autor:"Franz Kafka", año:1915, categoria:"Ficción", editorial:"Kurt Wolff Verlag", existencias:12},
+    {nombre:"El lobo estepario", autor:"Hermann Hesse", año:1927, categoria:"Filosofía", editorial:"S. Fischer Verlag", existencias:8},
+    {nombre:"Siddhartha", autor:"Hermann Hesse", año:1922, categoria:"Filosofía", editorial:"S. Fischer Verlag", existencias:10},
+    {nombre:"La naranja mecánica", autor:"Anthony Burgess", año:1962, categoria:"Distopía", editorial:"Heinemann", existencias:7},
+    {nombre:"El guardián entre el centeno", autor:"J.D. Salinger", año:1951, categoria:"Novela", editorial:"Little, Brown and Company", existencias:9},
+    {nombre:"A sangre fría", autor:"Truman Capote", año:1966, categoria:"Investigación", editorial:"Random House", existencias:6},
+    {nombre:"Crimen y castigo", autor:"Fiódor Dostoyevski", año:1866, categoria:"Clásico", editorial:"The Russian Messenger", existencias:10},
+    {nombre:"Los miserables", autor:"Victor Hugo", año:1862, categoria:"Clásico", editorial:"Pagnerre", existencias:8},
+    {nombre:"Anna Karenina", autor:"León Tolstói", año:1877, categoria:"Romance", editorial:"The Russian Messenger", existencias:7},
+    {nombre:"Guerra y paz", autor:"León Tolstói", año:1869, categoria:"Histórica", editorial:"The Russian Messenger", existencias:5},
+    {nombre:"La divina comedia", autor:"Dante Alighieri", año:1320, categoria:"Clásico", editorial:"Bonaccorsi", existencias:11},
+    {nombre:"Ulises", autor:"James Joyce", año:1922, categoria:"Moderna", editorial:"Shakespeare and Company", existencias:6},
+    {nombre:"Las mil y una noches", autor:"Anónimo", año:1704, categoria:"Mitología", editorial:"Galland", existencias:12},
+    {nombre:"Hamlet", autor:"William Shakespeare", año:1603, categoria:"Teatro", editorial:"N. Ling", existencias:10},
+    {nombre:"Macbeth", autor:"William Shakespeare", año:1606, categoria:"Teatro", editorial:"First Folio", existencias:9},
+    {nombre:"Romeo y Julieta", autor:"William Shakespeare", año:1597, categoria:"Romance", editorial:"Q1", existencias:10},
+    {nombre:"La ilíada", autor:"Homero", año:-750, categoria:"Épica", editorial:"Tradición oral", existencias:7},
+    {nombre:"La odisea", autor:"Homero", año:-700, categoria:"Épica", editorial:"Tradición oral", existencias:8},
+    {nombre:"El arte de la guerra", autor:"Sun Tzu", año:-500, categoria:"Estrategia", editorial:"Desconocido", existencias:11},
+    {nombre:"Meditaciones", autor:"Marco Aurelio", año:180, categoria:"Filosofía", editorial:"Imperial", existencias:9},
+    {nombre:"El príncipe", autor:"Nicolás Maquiavelo", año:1532, categoria:"Política", editorial:"Antonio Blado", existencias:7},
+    {nombre:"La República", autor:"Platón", año:-380, categoria:"Filosofía", editorial:"Academia", existencias:8},
+    {nombre:"Crítica de la razón pura", autor:"Immanuel Kant", año:1781, categoria:"Filosofía", editorial:"Johann Friedrich Hartknoch", existencias:6},
+    {nombre:"Más allá del bien y del mal", autor:"Friedrich Nietzsche", año:1886, categoria:"Filosofía", editorial:"C.G. Naumann", existencias:7},
+    {nombre:"Así habló Zaratustra", autor:"Friedrich Nietzsche", año:1883, categoria:"Filosofía", editorial:"Ernst Schmeitzner", existencias:9},
+    {nombre:"La riqueza de las naciones", autor:"Adam Smith", año:1776, categoria:"Economía", editorial:"W. Strahan", existencias:5},
+    {nombre:"El capital", autor:"Karl Marx", año:1867, categoria:"Economía", editorial:"Verlag von Otto Meissner", existencias:6},
+    {nombre:"Breve historia del tiempo", autor:"Stephen Hawking", año:1988, categoria:"Ciencia", editorial:"Bantam Books", existencias:12},
+    {nombre:"Cosmos", autor:"Carl Sagan", año:1980, categoria:"Ciencia", editorial:"Random House", existencias:11},
+    {nombre:"El gen egoísta", autor:"Richard Dawkins", año:1976, categoria:"Ciencia", editorial:"Oxford University Press", existencias:8},
+    {nombre:"El origen de las especies", autor:"Charles Darwin", año:1859, categoria:"Ciencia", editorial:"John Murray", existencias:10},
+    {nombre:"Apocalipsis", autor:"Stephen King", año:1978, categoria:"Terror", editorial:"Doubleday", existencias:7},
+    {nombre:"Cementerio de animales", autor:"Stephen King", año:1983, categoria:"Terror", editorial:"Doubleday", existencias:8},
+    {nombre:"Doctor Sueño", autor:"Stephen King", año:2013, categoria:"Terror", editorial:"Scribner", existencias:9},
+    {nombre:"El instituto", autor:"Stephen King", año:2019, categoria:"Thriller", editorial:"Scribner", existencias:6},
+    {nombre:"La carretera", autor:"Cormac McCarthy", año:2006, categoria:"Distopía", editorial:"Alfred A. Knopf", existencias:9},
+    {nombre:"El marciano", autor:"Andy Weir", año:2011, categoria:"Ciencia ficción", editorial:"Crown Publishing", existencias:7},
+    {nombre:"Dune", autor:"Frank Herbert", año:1965, categoria:"Ciencia ficción", editorial:"Chilton Books", existencias:11},
+    {nombre:"Neuromante", autor:"William Gibson", año:1984, categoria:"Ciencia ficción", editorial:"Ace Books", existencias:8},
+    {nombre:"Fundación", autor:"Isaac Asimov", año:1951, categoria:"Ciencia ficción", editorial:"Gnome Press", existencias:10},
+    {nombre:"Yo, robot", autor:"Isaac Asimov", año:1950, categoria:"Ciencia ficción", editorial:"Gnome Press", existencias:9},
+    {nombre:"Un mundo feliz", autor:"Aldous Huxley", año:1932, categoria:"Distopía", editorial:"Chatto & Windus", existencias:10},
+    {nombre:"El hombre invisible", autor:"H.G. Wells", año:1897, categoria:"Ciencia ficción", editorial:"C. Arthur Pearson", existencias:8},
+    {nombre:"La máquina del tiempo", autor:"H.G. Wells", año:1895, categoria:"Ciencia ficción", editorial:"Heinemann", existencias:9},
+    {nombre:"El señor de las moscas", autor:"William Golding", año:1954, categoria:"Novela", editorial:"Faber and Faber", existencias:7},
+    {nombre:"Los cuatro acuerdos", autor:"Miguel Ruiz", año:1997, categoria:"Autoayuda", editorial:"Amber-Allen Publishing", existencias:12},
+    {nombre:"Piense y hágase rico", autor:"Napoleon Hill", año:1937, categoria:"Autoayuda", editorial:"The Ralston Society", existencias:10},
+    {nombre:"El monje que vendió su Ferrari", autor:"Robin Sharma", año:1997, categoria:"Autoayuda", editorial:"HarperSanFrancisco", existencias:9},
+    {nombre:"Padre rico padre pobre", autor:"Robert Kiyosaki", año:1997, categoria:"Finanzas", editorial:"Warner Books", existencias:11},
+    {nombre:"Hábitos atómicos", autor:"James Clear", año:2018, categoria:"Autoayuda", editorial:"Avery", existencias:12},
+    {nombre:"El poder del ahora", autor:"Eckhart Tolle", año:1997, categoria:"Autoayuda", editorial:"New World Library", existencias:10},
+    {nombre:"El sutil arte de que te importe un carajo", autor:"Mark Manson", año:2016, categoria:"Autoayuda", editorial:"HarperOne", existencias:9},
+    {nombre:"Sapiens", autor:"Yuval Noah Harari", año:2011, categoria:"Historia", editorial:"Harvill Secker", existencias:12},
+    {nombre:"Homo Deus", autor:"Yuval Noah Harari", año:2015, categoria:"Ensayo", editorial:"Harvill Secker", existencias:11},
+    {nombre:"21 lecciones para el siglo XXI", autor:"Yuval Noah Harari", año:2018, categoria:"Ensayo", editorial:"Spiegel & Grau", existencias:10}
+];
+
+// unir los libros
+const todosLosLibros = [...librosIniciales, ...librosExtra];
+
+/* ================================
+   Guardar inicialmente solo si no hay ya libros en localStorage
+   (esto evita sobreescribir si ya tienes una BD local)
+   ================================ */
+if (!localStorage.getItem("libros")) {
+    localStorage.setItem("libros", JSON.stringify(todosLosLibros));
+}
+
+let libros = JSON.parse(localStorage.getItem("libros")) || [];
+
+/* ================================
+   Función para mostrar libros en la tabla (preserva diseño)
+   ================================ */
+function mostrarLibros() {
+    const tabla = document.getElementById("tablaLibros");
+
+    tabla.innerHTML = `
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Año</th>
+            <th>Categoría</th>
+            <th>Editorial</th>
+            <th>Existencias</th>
+            <th>Acción</th>
+        </tr>
+    `;
+
+    libros.forEach((libro, index) => {
+        // Asegurarse de que las propiedades existan
+        const titulo = libro.nombre ?? libro.titulo ?? "Sin título";
+        const autor = libro.autor ?? "Desconocido";
+        const anio = (libro.año ?? libro.anio ?? libro.year) !== undefined ? (libro.año ?? libro.anio ?? libro.year) : "—";
+        const cat = libro.categoria ?? libro.categ ?? "—";
+        const edit = libro.editorial ?? "—";
+        const exist = (typeof libro.existencias !== "undefined") ? libro.existencias : (libro.cantidad ?? "—");
+
+        tabla.innerHTML += `
+            <tr>
+                <td>${titulo}</td>
+                <td>${autor}</td>
+                <td>${anio}</td>
+                <td>${cat}</td>
+                <td>${edit}</td>
+                <td>${exist}</td>
+                <td><button class="btn-prestar" onclick="prestar(${index})">Prestar</button></td>
+            </tr>
+        `;
+    });
+}
+
+/* ================================
+   Registrar préstamo en usuario y en lista global (prestamosAdmin)
+   ================================ */
+function registrarPrestamoUsuarioYGlobal(libro) {
+    // usuarioActivo debe existir (creado en login)
+    let usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
+    if (!usuarioActivo) {
+        alert("Debes iniciar sesión para pedir un préstamo.");
+        return false;
+    }
+
+    // Obtener DB usuarios
+    let usuariosDB = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+    // Buscar usuario; si no existe, crearlo para mantener datos persistentes
+    let datosUsuario = usuariosDB.find(u => u.usuario === usuarioActivo.usuario);
+    if (!datosUsuario) {
+        datosUsuario = {
+            usuario: usuarioActivo.usuario,
+            contrasena: usuarioActivo.contrasena ?? "",
+            prestamos: [],
+            multas: []
+        };
+        usuariosDB.push(datosUsuario);
+    }
+
+    // Calcular fechas
+    const hoy = new Date();
+    const semanas = Math.floor(Math.random() * 4) + 2; // 2 a 5 semanas
+    const fechaLimite = new Date();
+    fechaLimite.setDate(hoy.getDate() + semanas * 7);
+
+    const prestamo = {
+        usuario: usuarioActivo.usuario,
+        titulo: libro.nombre ?? libro.titulo ?? "Sin título",
+        autor: libro.autor ?? "Desconocido",
+        fechaPrestamo: hoy.toISOString().split("T")[0],
+        fechaLimite: fechaLimite.toISOString().split("T")[0]
+    };
+
+    // Guardar en usuario
+    if (!Array.isArray(datosUsuario.prestamos)) datosUsuario.prestamos = [];
+    datosUsuario.prestamos.push(prestamo);
+
+    // Guardar usuarios DB
+    localStorage.setItem("usuarios", JSON.stringify(usuariosDB));
+
+    // Guardar en lista global de préstamos administrables por admin
+    let prestamosGlobales = JSON.parse(localStorage.getItem("prestamosAdmin")) || [];
+    prestamosGlobales.push(prestamo);
+    localStorage.setItem("prestamosAdmin", JSON.stringify(prestamosGlobales));
+
+    return true;
+}
+
+/* ================================
+   Función prestar: decrementa existencias y registra préstamo
+   ================================ */
+function prestar(i) {
+    // recargar libros por si se modificaron
+    libros = JSON.parse(localStorage.getItem("libros")) || libros;
+
+    if (!libros[i]) {
+        alert("Libro no encontrado.");
+        return;
+    }
+
+    // determinar existencias (propiedades posibles)
+    const existenciasProp = (typeof libros[i].existencias !== "undefined") ? "existencias" : (typeof libros[i].cantidad !== "undefined" ? "cantidad" : null);
+
+    let existencias = existenciasProp ? libros[i][existenciasProp] : undefined;
+
+    if (typeof existencias === "undefined") {
+        alert("Este libro no tiene campo de existencias configurado.");
+        return;
+    }
+
+    if (existencias <= 0) {
+        alert("No hay existencias disponibles.");
+        return;
+    }
+
+    // Registrar préstamo primero (aseguramos que usuario está y que se guarde)
+    const registrado = registrarPrestamoUsuarioYGlobal(libros[i]);
+    if (!registrado) return; // si no hay sesión, no descontar
+
+    // descontar
+    libros[i][existenciasProp] = existencias - 1;
+
+    // guardar cambios
+    localStorage.setItem("libros", JSON.stringify(libros));
+
+    // Actualizar vista
+    mostrarLibros();
+
+    alert("Libro prestado correctamente.");
+}
+
+/* ================================
+   Búsqueda en tiempo real (sin romper la página)
+   ================================ */
+document.getElementById("buscar").addEventListener("keyup", function () {
+    const texto = this.value.toLowerCase();
+    const filas = document.querySelectorAll("#tablaLibros tr");
+
+    filas.forEach((fila, index) => {
+        if (index === 0) return; // saltar encabezado
+        const contenido = fila.textContent.toLowerCase();
+        fila.style.display = contenido.includes(texto) ? "" : "none";
+    });
+});
+
+/* ================================
+   Inicializar: mostrar libros
+   ================================ */
+mostrarLibros();
+</script>
+
+</body>
+</html>

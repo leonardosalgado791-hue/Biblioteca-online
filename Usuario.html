@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Datos del Usuario</title>
+  <style>
+    /* --- TU DISEÑO ORIGINAL EXACTO --- */
+    body { background: #f5e9ec; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background: #581a25; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; }
+    .card { margin: 40px auto; width: 60%; background: white; padding: 30px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .title { font-size: 20px; font-weight: bold; color: #581a25; margin-bottom: 20px; text-align: center; }
+    .info { font-size: 18px; margin: 10px 0; color: #3a2025; }
+    .list-box { background: #f7dfe4; padding: 15px; border-radius: 10px; margin-top: 10px; }
+    .btn-volver { display: block; margin: 40px auto; width: 200px; background: #581a25; padding: 15px; text-align: center; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; }
+    .prestamo-item { text-align: left; margin-bottom: 8px; }
+    .small { font-size: 14px; color: #5a3d3f; }
+  </style>
+</head>
+
+<body>
+
+<header>👤 Información del Usuario</header>
+
+<div class="card">
+  <div class="title">Datos registrados</div>
+
+  <div class="info">
+    <strong>Usuario:</strong> <span id="user"></span>
+  </div>
+
+  <div class="info">
+    <strong>Contraseña:</strong> <span id="password"></span>
+  </div>
+
+  <div class="info">
+    <strong>Libros en préstamo:</strong>
+    <div id="prestamos" class="list-box"></div>
+  </div>
+
+  <div class="info">
+    <strong>Multas:</strong>
+    <div id="multas" class="list-box"></div>
+  </div>
+</div>
+
+<a class="btn-volver" href="menu.html">⬅ Volver al menú</a>
+
+<script>
+  // --- 1) OBTENER usuarioActivo ---
+  const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
+  if (!usuarioActivo) {
+    alert("No has iniciado sesión");
+    window.location.href = "login.html";
+  }
+  const nombreUsuario = usuarioActivo.usuario;
+
+  // --- 2) CARGAR usuarios DB ---
+  let usuariosDB = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+  // Buscar usuario en DB
+  let datosUsuario = usuariosDB.find(u => u.usuario === nombreUsuario);
+
+  // Si no existe, lo creamos con campos vacíos
+  if (!datosUsuario) {
+    datosUsuario = {
+      usuario: nombreUsuario,
+      contrasena: usuarioActivo.contrasena || "",
+      prestamos: [],
+      multas: []
+    };
+    usuariosDB.push(datosUsuario);
+    localStorage.setItem("usuarios", JSON.stringify(usuariosDB));
+  }
+
+  // Mostrar datos principales (sin cambiar diseño)
+  document.getElementById("user").textContent = datosUsuario.usuario;
+  document.getElementById("password").textContent = datosUsuario.contrasena;
+
+  // Función para calcular días entre dos fechas (fechaLimite - hoy). Retorna positivo si quedan días, negativo si está vencido.
+  function diasRestantes(fechaLimiteStr) {
+    const hoy = new Date();
+    const limite = new Date(fechaLimiteStr + "T00:00:00");
+    const diff = Math.floor((limite - hoy) / (1000 * 60 * 60 * 24));
+    return diff;
+  }
+
+  // Mostrar préstamos (si hay)
+  const prestamosDiv = document.getElementById("prestamos");
+  const multasDiv = document.getElementById("multas");
+
+  function actualizarVistas() {
+    usuariosDB = JSON.parse(localStorage.getItem("usuarios")) || [];
+    datosUsuario = usuariosDB.find(u => u.usuario === nombreUsuario) || datosUsuario;
+
+    // PRÉSTAMOS
+    if (!datosUsuario.prestamos || datosUsuario.prestamos.length === 0) {
+      prestamosDiv.textContent = "No tienes libros en préstamo.";
+    } else {
+     prestamosDiv.innerHTML = datosUsuario.prestamos.map(p => {
+  const dias = diasRestantes(p.fechaLimite);
+  const estado = dias >= 0 
+      ? `${dias} día(s) restantes`
+      : `Vencido por ${Math.abs(dias)} día(s)`;
+
+  return `
+    <div class="prestamo-item">
+      📘 <strong>${p.titulo}</strong> — ${p.autor || ''}
+      <br>
+      <span class="small">
+        Prestado: ${p.fechaPrestamo} · Límite: ${p.fechaLimite} · ${estado}
+      </span>
+    </div>
+  `;
+}).join("");
+    }
+
+    // MULTAS = calculadas en base a prestamos vencidos: $50 por día de retraso
+    let multasCalc = [];
+    if (datosUsuario.prestamos && datosUsuario.prestamos.length > 0) {
+      datosUsuario.prestamos.forEach(p => {
+        const dias = diasRestantes(p.fechaLimite);
+        if (dias < 0) {
+          const diasAtraso = Math.abs(dias);
+          const monto = diasAtraso * 50; // $50 por día
+          multasCalc.push({ nombreLibro: p.titulo, dias: diasAtraso, monto });
+        }
+      });
+    }
+
+    if (multasCalc.length === 0) {
+      multasDiv.textContent = "No tienes multas registradas.";
+    } else {
+      multasDiv.innerHTML = multasCalc.map(m => `⚠ ${m.nombreLibro} — $${m.monto} (${m.dias} días de retraso)`).join("<br>");
+    }
+  }
+
+  // Actualizar vista al cargar y cada vez que la página recupere foco (por si prestaste desde otra página)
+  actualizarVistas();
+  window.addEventListener("storage", actualizarVistas); // si otra pestaña cambia localStorage
+  window.addEventListener("focus", actualizarVistas);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Menú - Biblioteca Virtual</title>
+  <style>
+    body {
+      background: #62323C;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: white;
+    }
+
+    header {
+      background: #421f26;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .menu-container {
+      display: grid;
+      place-items: center;
+      margin-top: 60px;
+      gap: 25px;
+    }
+
+    .btn {
+      background: #ffdde6;
+      color: #581a25;
+      padding: 18px 30px;
+      border-radius: 14px;
+      font-size: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.15s;
+    }
+
+    .btn:hover {
+      background: #ffd1dc;
+      transform: scale(1.04);
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  📚 Menú Principal
+</header>
+
+<div class="menu-container">
+  <a class="btn" href="libros.html">📖 Ver libros disponibles</a>
+  <a class="btn" href="Usuario.html">👤 Mi Usuario</a>
+  <a class="btn" href="#" onclick="cerrarSesion()">🔙 Cerrar sesión</a>
+</div>
+
+<script>
+  // Validación correcta
+  const usuarioActual = localStorage.getItem("usuarioActivo");
+
+  if (!usuarioActual) {
+    alert("Debes iniciar sesión primero.");
+    window.location.href = "login.html";
+  }
+
+  function cerrarSesion() {
+    localStorage.removeItem("usuarioActivo");
+    window.location.href = "login.html";
+  }
+</script>
+
+</body>
+</html>
